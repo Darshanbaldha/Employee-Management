@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import "./App.css";
 import type { Employee } from "./types/employee";
 import api from "./api/employeeApi";
 import { EmployeeList } from "./components/EmployeeList";
 import { EmployeeForm } from "./components/EmployeeForm";
+import { EmployeeToolbar } from "./components/EmployeeToolBar";
 
 function App() {
   // Store the employee data(name, age, city).
@@ -17,7 +18,19 @@ function App() {
   });
 
   // Set the editId when user click on edit/update button. Otherwise default value is empty string.
-  const [editId, setEditId] = useState("");
+  const [editId, setEditId] = useState<string | "">("");
+
+  // set the search state.
+  const [search, setSearch] = useState<string | "">("");
+
+  // set city filter state.
+  const [cityFilter, setCityFilter] = useState("");
+
+  // Add sort state.
+  const [sortBy, setSortBy] = useState("");
+
+  // Get all unique city names to list cites.
+  const cities = [...new Set((employee ?? []).map((emp) => emp.city))];
 
   // send data(input field value) to backend and set form input field value to default.
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,13 +47,19 @@ function App() {
   }
 
   // fetch value from backend.
-  const getEmployee = async () => {
-    const res = await api.get("/");
+  const getEmployee = useCallback(async () => {
+    const res = await api.get("/", {
+      params: {
+        search,
+        city: cityFilter,
+        sort: sortBy,
+      },
+    });
     setEmployee(res.data.result);
-  }
+  }, [search, cityFilter, sortBy]);
 
-  // When page first time load call function getEmployee only one time.
-  useEffect(() => { getEmployee() }, []);
+  // When changes happen in getemployee function the render this useEffect.
+  useEffect(() => { getEmployee() }, [getEmployee]);
 
   // change form default value to employ id value and set edit id.
   const editEmployee = async (emp: Employee) => {
@@ -56,12 +75,22 @@ function App() {
 
   return (
     <>
-    {/* Call another component. Send some props to it's function.*/}
+      {/* Call another component. Send some props to it's function.*/}
       <EmployeeForm
         form={form}
         setForm={setForm}
         handleSubmit={handleSubmit}
         editId={editId}
+      />
+
+      <EmployeeToolbar
+        search={search}
+        setSearch={setSearch}
+        cityFilter={cityFilter}
+        setCityFilter={setCityFilter}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        cities={cities}
       />
 
       <EmployeeList

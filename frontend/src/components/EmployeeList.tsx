@@ -54,7 +54,8 @@ export function EmployeeList({ employee, editEmployee, deleteEmployee }: Employe
                 <h3 className="text-base font-semibold text-slate-800">Employee Directory</h3>
             </div>
 
-            {employee.length === 0 ? (
+            {/* {employee.length === 0 ? ( */}
+            {(employee ?? []).length === 0 ? (
                 <div className="p-8 text-center text-sm text-slate-500">
                     No employees found. Fill out the form above to add one.
                 </div>
