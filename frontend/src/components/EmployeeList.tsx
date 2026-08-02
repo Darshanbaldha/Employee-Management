@@ -8,6 +8,9 @@ type EmployeeListProps = {
     editEmployee: (emp: Employee) => void;
     // This Takes the id in string formate and returns nothings.
     deleteEmployee: (id: string) => void;
+
+    loading: boolean;
+    error: string;
 };
 
 // This all props are give to EmployeeList and its type are similear to EmployeeListProps.
@@ -47,7 +50,7 @@ type EmployeeListProps = {
 //     )
 // }
 
-export function EmployeeList({ employee, editEmployee, deleteEmployee }: EmployeeListProps) {
+export function EmployeeList({ employee, editEmployee, deleteEmployee, loading, error }: EmployeeListProps) {
     return (
         <section className="mt-8 overflow-hidden rounded-2xl bg-white shadow-md border border-slate-100">
             <div className="border-b border-slate-100 bg-slate-50/50 px-6 py-4">
@@ -55,7 +58,15 @@ export function EmployeeList({ employee, editEmployee, deleteEmployee }: Employe
             </div>
 
             {/* {employee.length === 0 ? ( */}
-            {(employee ?? []).length === 0 ? (
+            {loading ? (
+                <div className="p-8 text-center text-slate-500">
+                    Loading employees...
+                </div>
+            ) : error ? (
+                <div className="p-8 text-center text-red-600">
+                    {error}
+                </div>
+            ) : (employee ?? []).length === 0 ? (
                 <div className="p-8 text-center text-sm text-slate-500">
                     No employees found. Fill out the form above to add one.
                 </div>

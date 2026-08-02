@@ -12,18 +12,20 @@ type EmployeeToolbarProps = {
     setSortBy: React.Dispatch<React.SetStateAction<string>>;
 
     cities: string[];
+
+    setPage: React.Dispatch<React.SetStateAction<number>>;
 };
 
-export function EmployeeToolbar({ search, setSearch, cityFilter, setCityFilter, sortBy, setSortBy, cities }: EmployeeToolbarProps) {
+export function EmployeeToolbar({ search, setSearch, cityFilter, setCityFilter, sortBy, setSortBy, cities, setPage }: EmployeeToolbarProps) {
     return (
         <div className="mx-auto mt-6 max-w-5xl rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="grid gap-4 md:grid-cols-3">
 
                 {/* Search */}
-                <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} className="rounded-lg border border-slate-300 px-4 py-2" />
+                <input type="text" placeholder="Search by name" value={search} onChange={(e) => {setSearch(e.target.value); setPage(1);}} className="rounded-lg border border-slate-300 px-4 py-2" />
 
                 {/* Filter */}
-                <select value={cityFilter} onChange={(e) => setCityFilter(e.target.value)} className="rounded-lg border border-slate-300 px-4 py-2" >
+                <select value={cityFilter} onChange={(e) => {setCityFilter(e.target.value); setPage(1);}} className="rounded-lg border border-slate-300 px-4 py-2" >
                     <option value="">All Cities</option>
 
                     {cities.map((city) => (
@@ -34,7 +36,7 @@ export function EmployeeToolbar({ search, setSearch, cityFilter, setCityFilter, 
                 </select>
 
                 {/* Sort */}
-                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="rounded-lg border border-slate-300 px-4 py-2" >
+                <select value={sortBy} onChange={(e) => {setSortBy(e.target.value); setPage(1);}} className="rounded-lg border border-slate-300 px-4 py-2" >
                     <option value="">Default</option>
                     <option value="nameAsc">Name A-Z</option>
                     <option value="nameDesc">Name Z-A</option>

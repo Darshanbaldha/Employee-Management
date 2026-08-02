@@ -22,29 +22,26 @@ const getEmployee = async (_req: Request, res: Response): Promise<void> => {
         const city = _req.query.city as string || "";
         const sort = _req.query.sort as string || "";
 
+        // Current page number. Default = 1
+        const page = Number(_req.query.page) || 1;
+
+        // Records per page. Default = 5
+        const limit = Number(_req.query.limit) || 5;
+
+        // Number of records to skip
+        const skip = (page - 1) * limit;
+
         const query: any = {
-            $or: [
-                {
-                    // Search name
-                    name: {
-                        // Regex means partial search.
-                        $regex: search,
-                        // Making it case insensitive.
-                        $options: "i"
-                    }
-                },
-                {
-                    // search city.
-                    city: {
-                        $regex: search,
-                        $options: "i"
-                    }
-                }
-            ]
+            name: {
+                // Regex means partial search.
+                $regex: search,
+                // Making it case insensitive.
+                $options: "i"
+            }
         }
 
         if (city !== "") {
-            // quert.city takes the value from city params. And add in the query along with $or
+            // quert.city takes the value from city params. And add in the query along with name
             query.city = city;
         }
 
@@ -74,11 +71,26 @@ const getEmployee = async (_req: Request, res: Response): Promise<void> => {
                 sortOption = {};
         }
 
+        // Count Records(Noumber of total employee). For create total Page numbers.
+        const totalRecords = await Employee.countDocuments(query);
+        const totalPages = Math.ceil(totalRecords / limit);
+
         // search by city or name and sort.
-        const result = await Employee.find(query).sort(sortOption);
-        res.status(200).json({ message: "Employee Fetched.", result })
+        const result = await Employee.find(query).sort(sortOption).skip(skip).limit(limit);
+        res.status(200).json({ message: "Employee Fetched.", result, totalRecords, totalPages, currentPage: page })
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : "Failed to fetch employee.";
+        res.status(500).json({ message })
+    }
+}
+
+// Fetch All cities and send Response.
+const getCities = async (_req: Request, res: Response): Promise<void> => {
+    try {
+        const cities = await Employee.distinct("city");
+        res.status(200).json({ cities })
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "Failed to fetch cities.";
         res.status(500).json({ message })
     }
 }
@@ -118,4 +130,4 @@ const deleteEmployee = async (req: Request, res: Response): Promise<void> => {
     res.status(200).json({ message: "Employee deleted", result })
 }
 
-export { createEmployee, getEmployee, updateEmployee, deleteEmployee }
+export { createEmployee, getEmployee, updateEmployee, deleteEmployee, getCities }
