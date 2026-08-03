@@ -33,4 +33,16 @@ const employSchema = new mongoose.Schema<IEmployee>(
     { timestamps: true }
 )
 
+// Index for searching employees by name
+employSchema.index({ name: 1 });
+
+// Index for filtering employees by city
+// employSchema.index({ city: 1 });
+
+// Index for sorting newest and oldest employees
+// employSchema.index({ createdAt: -1 });
+
+// Intex for text searching employees by name and city.
+employSchema.index({name: "text", city: "text"})
+
 export const Employee = mongoose.model("employees", employSchema)

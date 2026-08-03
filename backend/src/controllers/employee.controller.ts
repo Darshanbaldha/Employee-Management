@@ -32,11 +32,19 @@ const getEmployee = async (_req: Request, res: Response): Promise<void> => {
         const skip = (page - 1) * limit;
 
         const query: any = {
+            // search name using regex.
+            // name: {
+            //     // Regex means partial search.
+            //     $regex: search,
+            //     // Making it case insensitive.
+            //     $options: "i"
+            // }
+
+            // search using text search.
             name: {
-                // Regex means partial search.
-                $regex: search,
-                // Making it case insensitive.
-                $options: "i"
+                $text: {
+                    $search: search
+                }
             }
         }
 
@@ -77,7 +85,7 @@ const getEmployee = async (_req: Request, res: Response): Promise<void> => {
 
         // search by city or name and sort.
         const result = await Employee.find(query).sort(sortOption).skip(skip).limit(limit);
-        res.status(200).json({ message: "Employee Fetched.", result, totalRecords, totalPages, currentPage: page })
+        res.status(200).json({ message: "Employee Fetched.", result, totalPages, currentPage: page })
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : "Failed to fetch employee.";
         res.status(500).json({ message })
@@ -130,4 +138,55 @@ const deleteEmployee = async (req: Request, res: Response): Promise<void> => {
     res.status(200).json({ message: "Employee deleted", result })
 }
 
-export { createEmployee, getEmployee, updateEmployee, deleteEmployee, getCities }
+// Employee aggregation pipeline.
+const getEmployyStatic = async (_req: Request, res: Response): Promise<void> => {
+    try {
+        const query = await Employee.aggregate([
+            {
+                $group: {
+                    // Group all employees into one group.
+                    // _id: null,
+                    _id: "$city",
+
+                    // Count total employees.
+                    totalEmployees: { $sum: 1 },
+
+                    // Calculate average age.
+                    averageAge: { $avg: "$age" },
+
+                    // Find highest age.
+                    oldestEmployee: { $max: "$age" },
+
+                    // Find lowest age.
+                    youngestEmployee: { $min: "$age" }
+                }
+            },
+            {
+                $project: {
+                    // Remove _id field.
+                    _id: 0,
+
+                    // convert _id to city.
+                    city: "$_id",
+
+                    // Keep these fields in response.
+                    totalEmployees: 1,
+                    oldestEmployee: 1,
+                    youngestEmployee: 1,
+
+                    // Round average age to 2 decimal places.
+                    averageAge: {
+                        $round: ["$averageAge", 2]
+                    }
+                }
+            }
+        ])
+
+        res.status(200).json({ message: "Employee statistics fetched successfully.", query });
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "Failed to fetch employee statistics.";
+        res.status(500).json({ message });
+    }
+}
+
+export { createEmployee, getEmployee, updateEmployee, deleteEmployee, getCities, getEmployyStatic }
