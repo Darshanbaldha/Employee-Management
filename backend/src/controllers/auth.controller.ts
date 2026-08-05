@@ -20,8 +20,16 @@ const registerUser = async (req: Request, res: Response): Promise<void> => {
 
         const user = await User.create({ name, email, password: hashedPassword, role })
 
+        // Remove password.
+        const data: object = {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role
+        }
+
         if (user) {
-            res.status(201).json({ message: "User created successfully.", user })
+            res.status(201).json({ message: "User created successfully.", user: data })
         }
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : "Failed to register user.";
@@ -57,7 +65,15 @@ const loginUser = async (req: Request, res: Response): Promise<void> => {
             { expiresIn: "1d" }
         )
 
-        res.status(200).json({ message: "Login successfull.", token, user })
+        // Remove password.
+        const data: object = {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role
+        }
+
+        res.status(200).json({ message: "Login successfull.", token, user: data })
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : "Login Failed.";
         res.status(500).json({ message })
