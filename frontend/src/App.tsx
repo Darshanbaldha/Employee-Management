@@ -6,6 +6,7 @@ import { EmployeeList } from "./components/EmployeeList";
 import { EmployeeForm } from "./components/EmployeeForm";
 import { EmployeeToolbar } from "./components/EmployeeToolBar";
 import { AxiosError } from "axios";
+import { Login } from "./components/Login";
 
 function App() {
   // Store the employee data(name, age, city).
@@ -47,6 +48,10 @@ function App() {
   // Store API error message
   const [error, setError] = useState("");
 
+  // user login or not.
+  // check if token is already exists or not.
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(!!localStorage.getItem("token"));
+
   // send data(input field value) to backend and set form input field value to default.
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,10 +59,10 @@ function App() {
       setError("");
 
       if (editId !== "") {
-        await api.put(`/${editId}`, form);
+        await api.put(`/employee/${editId}`, form);
         setEditId("");
       } else {
-        await api.post("/", form);
+        await api.post("/employee", form);
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -76,7 +81,7 @@ function App() {
     try {
       setLoading(true);
       setError("")
-      const res = await api.get("/", {
+      const res = await api.get("/employee", {
         params: {
           search,
           city: cityFilter,
@@ -107,7 +112,7 @@ function App() {
   useEffect(() => {
     const fetchCities = async () => {
       try {
-        const res = await api.get("/cities");
+        const res = await api.get("/employee/cities");
         setCities(res.data.cities);
       } catch (err: unknown) {
         if (err instanceof Error) {
@@ -130,7 +135,7 @@ function App() {
   const deleteEmployee = async (id: string) => {
     try {
       setError("");
-      await api.delete(`/${id}`);
+      await api.delete(`/employee/${id}`);
       getEmployee();
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
@@ -147,8 +152,22 @@ function App() {
     (_, index) => index + 1
   );
 
+  if (!isLoggedIn) {
+    return (
+      <Login setIsLoggedIn = {setIsLoggedIn} />
+    )
+  }
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+  };
+
   return (
     <>
+      <button onClick={logout} className="rounded bg-red-600 px-4 py-2 text-white" >
+        Logout
+      </button>
       {/* Call another component. Send some props to it's function.*/}
       <EmployeeForm
         form={form}

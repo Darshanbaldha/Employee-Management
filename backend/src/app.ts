@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors"
 import databaseConn from "./db/conn.js";
 import employeeRouter from "./routes/employee.routes.js";
+import authRouter from "./routes/auth.route.js";
 
 const app = express();
 
@@ -19,6 +20,7 @@ databaseConn;
 
 // Routes.
 app.use("/employee", employeeRouter);
+app.use("/auth", authRouter);
 
 // Server connection.
 app.listen(PORT, () => {

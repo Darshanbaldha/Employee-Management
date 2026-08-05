@@ -39,16 +39,16 @@ const getEmployee = async (_req: Request, res: Response): Promise<void> => {
             //     // Making it case insensitive.
             //     $options: "i"
             // }
-
-            // search using text search.
-            name: {
-                $text: {
-                    $search: search
-                }
-            }
         }
 
-        if (city !== "") {
+        // search using text search.
+        if (search.trim() !== "") {
+            query.$text = {
+                $search: search,
+            };
+        }
+
+        if (city.trim() !== "") {
             // quert.city takes the value from city params. And add in the query along with name
             query.city = city;
         }
