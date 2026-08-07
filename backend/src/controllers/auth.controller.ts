@@ -28,8 +28,18 @@ const registerUser = async (req: Request, res: Response): Promise<void> => {
             role: user.role
         }
 
+        // Generate jwt token.
+        const token = jwt.sign(
+            {
+                id: user._id,
+                role: user.role
+            },
+            process.env.JWT_SECRET as string,
+            { expiresIn: "1d" }
+        )
+
         if (user) {
-            res.status(201).json({ message: "User created successfully.", user: data })
+            res.status(201).json({ message: "User created successfully.", token, user: data })
         }
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : "Failed to register user.";

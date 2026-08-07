@@ -7,6 +7,8 @@ import { EmployeeForm } from "./components/EmployeeForm";
 import { EmployeeToolbar } from "./components/EmployeeToolBar";
 import { AxiosError } from "axios";
 import { Login } from "./components/Login";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Signup } from "./components/Signup";
 
 function App() {
   // Store the employee data(name, age, city).
@@ -106,10 +108,16 @@ function App() {
   }, [search, cityFilter, sortBy, page]);
 
   // When changes happen in getemployee function the render this useEffect.
-  useEffect(() => { getEmployee() }, [getEmployee]);
+  // useEffect(() => { getEmployee() }, [getEmployee]);
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    void getEmployee();
+  }, [isLoggedIn, getEmployee]);
 
   // Fetch all the cities.
   useEffect(() => {
+    if (!isLoggedIn) return;
     const fetchCities = async () => {
       try {
         const res = await api.get("/employee/cities");
@@ -123,7 +131,7 @@ function App() {
       }
     };
     void fetchCities();
-  }, []);
+  }, [isLoggedIn]);
 
   // change form default value to employ id value and set edit id.
   const editEmployee = async (emp: Employee) => {
@@ -154,7 +162,7 @@ function App() {
 
   if (!isLoggedIn) {
     return (
-      <Login setIsLoggedIn = {setIsLoggedIn} />
+      <Login setIsLoggedIn={setIsLoggedIn} />
     )
   }
 
@@ -165,6 +173,14 @@ function App() {
 
   return (
     <>
+
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
+          <Route path="/signup" element={<Signup setIsLoggedIn={setIsLoggedIn} />} />
+        </Routes>
+      </BrowserRouter>
+
       <button onClick={logout} className="rounded bg-red-600 px-4 py-2 text-white" >
         Logout
       </button>
