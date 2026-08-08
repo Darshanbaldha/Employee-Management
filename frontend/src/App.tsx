@@ -7,7 +7,7 @@ import { EmployeeForm } from "./components/EmployeeForm";
 import { EmployeeToolbar } from "./components/EmployeeToolBar";
 import { AxiosError } from "axios";
 import { Login } from "./components/Login";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { Signup } from "./components/Signup";
 
 function App() {
@@ -54,6 +54,8 @@ function App() {
   // check if token is already exists or not.
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(!!localStorage.getItem("token"));
 
+  // check if role is admin or employee.
+  const role: string = localStorage.getItem("role") || ""
   // send data(input field value) to backend and set form input field value to default.
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,7 +164,11 @@ function App() {
 
   if (!isLoggedIn) {
     return (
-      <Login setIsLoggedIn={setIsLoggedIn} />
+      <Routes>
+        <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
+        <Route path="/signup" element={<Signup setIsLoggedIn={setIsLoggedIn} />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
     )
   }
 
@@ -173,24 +179,18 @@ function App() {
 
   return (
     <>
-
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
-          <Route path="/signup" element={<Signup setIsLoggedIn={setIsLoggedIn} />} />
-        </Routes>
-      </BrowserRouter>
-
       <button onClick={logout} className="rounded bg-red-600 px-4 py-2 text-white" >
         Logout
       </button>
       {/* Call another component. Send some props to it's function.*/}
-      <EmployeeForm
-        form={form}
-        setForm={setForm}
-        handleSubmit={handleSubmit}
-        editId={editId}
-      />
+      {role === "admin" && (
+        <EmployeeForm
+          form={form}
+          setForm={setForm}
+          handleSubmit={handleSubmit}
+          editId={editId}
+        />
+      )}
 
       <EmployeeToolbar
         search={search}
@@ -209,6 +209,7 @@ function App() {
         deleteEmployee={deleteEmployee}
         loading={loading}
         error={error}
+        role={role}
       />
 
       <div className="mt-8 flex items-center justify-center gap-2">
